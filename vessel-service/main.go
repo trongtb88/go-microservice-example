@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	pb "microservices/practice/vessel-service/proto/vessel"
+
+	pb "github.com/trongtb88/go-microservice-example/vessel-service/proto/vessel"
 
 	micro "github.com/micro/go-micro"
 )
