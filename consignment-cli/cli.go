@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	pb "microservices/go-microservice-example/consignment-service/proto/consignment"
 	"os"
+
+	pb "github.com/trongtb88/go-microservice-example/consignment-service/proto/consignment"
 
 	micro "github.com/micro/go-micro"
 	"github.com/micro/go-micro/metadata"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	pb "microservices/go-microservice-example/consignment-service/proto/consignment"
+	pb "github.com/trongtb88/go-microservice-example/consignment-service/proto/consignment"
 
 	vesselProto "github.com/trongtb88/go-microservice-example/vessel-service/proto/vessel"
 
