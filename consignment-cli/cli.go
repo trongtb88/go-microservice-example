@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	pb "microservices/practice/consignment-service/proto/consignment"
+	pb "microservices/go-microservice-example/consignment-service/proto/consignment"
 	"os"
 
 	micro "github.com/micro/go-micro"
+	"github.com/micro/go-micro/metadata"
 )
 
 const (
@@ -28,15 +29,18 @@ func parseFile(file string) (*pb.Consignment, error) {
 }
 
 func main() {
-	service := micro.NewService(micro.Name("shippy.cli.consignment"))
-	service.Init()
 
-	client := pb.NewShippingServiceClient("consignment", service.Client())
+	serviceConsignment := micro.NewService(micro.Name("consignment.cli"))
+	serviceConsignment.Init()
+	// Create new greeter client
+	shipping := pb.NewShippingService("consignment", serviceConsignment.Client())
 
 	// Contact the server and print out its response.
 	file := defaultFilename
+	var token string
 	if len(os.Args) > 1 {
 		file = os.Args[1]
+		token = os.Args[2]
 	}
 
 	consignment, err := parseFile(file)
@@ -45,13 +49,17 @@ func main() {
 		log.Fatalf("Could not parse file: %v", err)
 	}
 
-	r, err := client.CreateConsignment(context.Background(), consignment)
+	ctx := metadata.NewContext(context.Background(), map[string]string{
+		"token": token,
+	})
+
+	r, err := shipping.CreateConsignment(ctx, consignment)
 	if err != nil {
-		log.Fatalf("Could not greet: %v", err)
+		log.Fatalf("Could not create: %v", err)
 	}
 	log.Printf("Created: %t", r.Created)
 
-	getAll, err := client.GetConsignments(context.Background(), &pb.GetRequest{})
+	getAll, err := shipping.GetConsignments(ctx, &pb.GetRequest{})
 	if err != nil {
 		log.Fatalf("Could not list consignments: %v", err)
 	}

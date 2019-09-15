@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	pb "github.com/trongtb88/go-microservice-example/consignment-service/proto/consignment"
+	pb "microservices/go-microservice-example/consignment-service/proto/consignment"
+
 	vesselProto "github.com/trongtb88/go-microservice-example/vessel-service/proto/vessel"
 
-	"github.com/micro/go-micro"
+	micro "github.com/micro/go-micro"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,17 +49,17 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 }
 
 type service struct {
-	repo         repository
-	logger       *log.Logger
-	vesselClient vesselProto.VesselServiceClient
+	repo          repository
+	logger        *log.Logger
+	vesselService vesselProto.VesselService
 }
 
 func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
-
-	vesselResponse, err := s.vesselClient.FindAvailable(context.Background(), &vesselProto.Specification{
+	var vesselResponse vesselProto.Response
+	err := s.vesselService.FindAvailable(context.Background(), &vesselProto.Specification{
 		MaxWeight: req.Weight,
 		Capacity:  int32(len(req.Containers)),
-	})
+	}, &vesselResponse)
 	logger.WithField("vesselResponse.Vessel.Name", vesselResponse.Vessel.Name).Info("Found vessel:")
 	if err != nil {
 		logger.Error(err)
@@ -93,10 +95,10 @@ func main() {
 
 	srv.Init()
 
-	vesselClient := vesselProto.NewVesselServiceClient("vessel", srv.Client())
+	vesselService := vesselProto.NewVesselService("vessel", srv.Client())
 
 	// Register handler
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, logger, vesselClient})
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, logger, vesselService})
 
 	// Run the server
 	if err := srv.Run(); err != nil {
