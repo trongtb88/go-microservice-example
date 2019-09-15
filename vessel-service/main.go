@@ -5,23 +5,23 @@ import (
 	"errors"
 	"fmt"
 
-	pb "github.com/trongtb88/go-microservice-example/vessel-service/proto/vessel"
+	pb_vessel "microservices/go-microservice-example/vessel-service/proto/vessel"
 
 	micro "github.com/micro/go-micro"
 )
 
 type Repository interface {
-	FindAvailable(*pb.Specification) (*pb.Vessel, error)
+	FindAvailable(*pb_vessel.Specification) (*pb_vessel.Vessel, error)
 }
 
 type VesselRepository struct {
-	vessels []*pb.Vessel
+	vessels []pb_vessel.Vessel
 }
 
-func (repo *VesselRepository) FindAvailable(spec *pb.Specification) (*pb.Vessel, error) {
+func (repo *VesselRepository) FindAvailable(spec *pb_vessel.Specification) (*pb_vessel.Vessel, error) {
 	for _, vessel := range repo.vessels {
 		if spec.GetCapacity() <= vessel.GetCapacity() && spec.MaxWeight <= vessel.MaxWeight {
-			return vessel, nil
+			return &vessel, nil
 		}
 	}
 	return nil, errors.New("No vessel found by that spec")
@@ -31,7 +31,7 @@ type service struct {
 	repo Repository
 }
 
-func (s *service) FindAvailable(ctx context.Context, req *pb.Specification, res *pb.Response) error {
+func (s *service) FindAvailable(ctx context.Context, req *pb_vessel.Specification, res *pb_vessel.Response) error {
 	vessel, err := s.repo.FindAvailable(req)
 	if err != nil {
 		return err
@@ -41,8 +41,8 @@ func (s *service) FindAvailable(ctx context.Context, req *pb.Specification, res 
 }
 
 func main() {
-	vessels := []*pb.Vessel{
-		&pb.Vessel{Id: "vessel001", Name: "Boaty McBoatface", MaxWeight: 200000, Capacity: 500},
+	vessels := []pb_vessel.Vessel{
+		pb_vessel.Vessel{Id: "vessel001", Name: "Boaty McBoatface", MaxWeight: 200000, Capacity: 500},
 	}
 	repo := &VesselRepository{vessels}
 
@@ -53,7 +53,7 @@ func main() {
 	srv.Init()
 
 	// Register our implementation with
-	pb.RegisterVesselServiceHandler(srv.Server(), &service{repo})
+	pb_vessel.RegisterVesselServiceHandler(srv.Server(), &service{repo})
 
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)

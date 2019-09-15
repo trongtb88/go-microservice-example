@@ -9,12 +9,6 @@ import (
 	math "math"
 )
 
-import (
-	client "github.com/micro/go-micro/client"
-	server "github.com/micro/go-micro/server"
-	context "golang.org/x/net/context"
-)
-
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -227,61 +221,4 @@ var fileDescriptor_04ef66862bb50716 = []byte{
 	0xee, 0x39, 0x4f, 0xee, 0x0e, 0x67, 0x9e, 0x0f, 0xa3, 0x47, 0x17, 0x2d, 0xce, 0x06, 0x79, 0x08,
 	0x17, 0x9c, 0x6c, 0x6d, 0x79, 0xa8, 0x9b, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0b, 0x8c, 0xe2,
 	0x74, 0xc5, 0x01, 0x00, 0x00,
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ client.Option
-var _ server.Option
-
-// Client API for VesselService service
-
-type VesselServiceClient interface {
-	FindAvailable(ctx context.Context, in *Specification, opts ...client.CallOption) (*Response, error)
-}
-
-type vesselServiceClient struct {
-	c           client.Client
-	serviceName string
-}
-
-func NewVesselServiceClient(serviceName string, c client.Client) VesselServiceClient {
-	if c == nil {
-		c = client.NewClient()
-	}
-	if len(serviceName) == 0 {
-		serviceName = "vessel"
-	}
-	return &vesselServiceClient{
-		c:           c,
-		serviceName: serviceName,
-	}
-}
-
-func (c *vesselServiceClient) FindAvailable(ctx context.Context, in *Specification, opts ...client.CallOption) (*Response, error) {
-	req := c.c.NewRequest(c.serviceName, "VesselService.FindAvailable", in)
-	out := new(Response)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for VesselService service
-
-type VesselServiceHandler interface {
-	FindAvailable(context.Context, *Specification, *Response) error
-}
-
-func RegisterVesselServiceHandler(s server.Server, hdlr VesselServiceHandler, opts ...server.HandlerOption) {
-	s.Handle(s.NewHandler(&VesselService{hdlr}, opts...))
-}
-
-type VesselService struct {
-	VesselServiceHandler
-}
-
-func (h *VesselService) FindAvailable(ctx context.Context, in *Specification, out *Response) error {
-	return h.VesselServiceHandler.FindAvailable(ctx, in, out)
 }
